@@ -1,1 +1,2 @@
-# econ238-portfolio
+# Thomas Hamilton - ECON 238 Portfolio
+## Assignments
