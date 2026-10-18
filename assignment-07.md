@@ -23,10 +23,19 @@ Alaska's delegation fought for decades to open ANWR and won a 50–70% revenue s
 
 #Sources
 Lease sales and current law: https://worldoil.com/news/2026/4/17/u-s-sets-2026-oil-and-gas-lease-sale-in-alaska-s-arctic-coastal-plain/
+
 Royalty rate and revenue split: https://www.law.cornell.edu/uscode/text/16/3143
+
 Reserve estimates: https://www.petroleumnews.com/pnads/896182993.shtml
+
 Leasing history and 2021 bids: https://www.independentwomen.com/2026/04/24/alaska-oil-and-gas-leases-receive-record-interest-with-anwr-on-deck/
+
 Caribou: https://petroleumnews.com/pnarchpop/404804223.shtml
+
 Polar bears: https://defenders.org/blog/2020/09/polar-bear-cubs-need-help-surviving-arctic-refuge-leasing
-Gwich'in and Kaktovik positions: https://www.opb.org/article/2025/10/24/trump-administration-finalizes-plan-to-open-pristine-alaska-wildlife-refuge-to-oil-and-gas-drilling/
+
+Gwich'in and Kaktovik positions: https://www.opb.org/article/2025/10/24/trump-administration-finalizes-plan-to-open-pristine-alaska-
+
+wildlife-refuge-to-oil-and-gas-drilling/
+
 Grid queue: https://emp.lbl.gov/queued-2026-edition-characteristics-power-plants-seeking-transmission-interconnection-end-2025
