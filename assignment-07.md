@@ -21,7 +21,8 @@ The weakest number is the total quantity of barrels. Sixteen billion is an optim
 Why isn't this already happening?
 Alaska's delegation fought for decades to open ANWR and won a 50–70% revenue share, and Alaska has every reason to block the redirection of funds. Also, Oil companies care about lease terms, and the current incentives may not be strong enough to start drilling. On top of that, many environmental groups treat ANWR as a line they won't trade. Endorsing drilling, even for green money, would split their donors. Drilling supporters don't want oil revenue earmarked for wind and transmission.  Budget rules also work against it. Congress has used ANWR revenue to offset tax bills; a locked endowment removes money politicians can spend now. Dedicated trust funds also invite future raids, so promises lack credibility. Finally, government policy has frequently flipped. ANWR leasing was authorized in 2017, paused in 2021, canceled in 2023, and mandated again in 2025, so it has a very uncertain future.
 
-#Sources
+Sources:
+
 Lease sales and current law: https://worldoil.com/news/2026/4/17/u-s-sets-2026-oil-and-gas-lease-sale-in-alaska-s-arctic-coastal-plain/
 
 Royalty rate and revenue split: https://www.law.cornell.edu/uscode/text/16/3143
