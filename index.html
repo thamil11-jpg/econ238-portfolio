@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Who Gets the Wall?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single river-gauge column; each section is a "station" marked on a left water-level rail. */
+:root{
+  --bg:#eef1f0; --surface:#ffffff; --ink:#18232a; --muted:#56646c; --line:#cfd8d9;
+  --water:#1f5f73; --water-soft:#d6e6ea; --gauge:#d9601a; --gauge-soft:#f8e2d4;
+  --good:#2f7a4f; --bad:#b23a2a;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111a1e; --surface:#18242a; --ink:#e4ecec; --muted:#9db0b5; --line:#2c3c43;
+  --water:#6fb6cb; --water-soft:#1c3640; --gauge:#f08a4b; --gauge-soft:#3a2518;
+  --good:#6cc794; --bad:#ef7a66; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111a1e; --surface:#18242a; --ink:#e4ecec; --muted:#9db0b5; --line:#2c3c43;
+  --water:#6fb6cb; --water-soft:#1c3640; --gauge:#f08a4b; --gauge-soft:#3a2518;
+  --good:#6cc794; --bad:#ef7a66; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.6rem,9vw,4.6rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,4.5vw,2.2rem);font-weight:700}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0;max-width:65ch}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.label{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--water)}
+:focus-visible{outline:2px solid var(--gauge);outline-offset:2px}
+
+header.hero{padding-block:56px 32px;display:grid;gap:18px;border-bottom:3px solid var(--water)}
+.hero .kicker{color:var(--gauge)}
+.hero p.lede{font-size:1.2rem}
+.hero h1 span{color:var(--water)}
+
+.station{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 16px;padding-top:44px}
+.rail{position:relative}
+.rail::before{content:"";position:absolute;left:21px;top:0;bottom:-44px;width:2px;background:var(--line)}
+.mark{position:relative;width:44px;height:44px;border-radius:50%;background:var(--water);color:var(--surface);
+  display:grid;place-items:center;font-family:var(--mono);font-size:.8rem;font-weight:500}
+.station:last-of-type .rail::before{display:none}
+.content{display:grid;gap:16px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:16px}
+
+/* levee */
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-family:var(--display);font-weight:500;font-size:.95rem;cursor:pointer;
+  border:1.5px solid var(--water);background:transparent;color:var(--water);border-radius:999px;padding:6px 14px}
+button[aria-pressed="true"]{background:var(--water);color:var(--surface)}
+.sliders{display:grid;gap:14px}
+.slider{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:baseline}
+.slider label{font-family:var(--display);font-size:.95rem}
+.slider output{font-family:var(--mono);font-size:.95rem}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--water)}
+.gauge{display:grid;gap:8px}
+.bar{position:relative;height:30px;background:var(--water-soft);border-radius:4px;overflow:hidden}
+.fill{position:absolute;inset:0 auto 0 0;background:var(--bad);transition:width .35s ease, background .35s}
+.fill.pass{background:var(--good)}
+.thresh{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.scale{position:relative;height:18px;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.scale span{position:absolute;transform:translateX(-50%)}
+.verdict{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.verdict .big{font-family:var(--mono);font-size:2rem;font-weight:500}
+.pill{font-family:var(--mono);font-size:.8rem;padding:3px 10px;border-radius:999px;color:var(--surface)}
+.pill.pass{background:var(--good)} .pill.fail{background:var(--bad)}
+.note{font-size:.88rem;color:var(--muted)}
+
+/* noise */
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.who button{border-radius:6px;text-align:left;padding:10px 12px}
+.outcome{border-left:4px solid var(--gauge);background:var(--gauge-soft);padding:14px 16px;border-radius:0 6px 6px 0;display:grid;gap:6px}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.num{display:grid;gap:2px}
+.num b{font-family:var(--mono);font-weight:500;font-size:1.3rem}
+
+/* quiz */
+.q{display:grid;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:0;padding-bottom:0}
+.opts{display:grid;gap:6px}
+.opts button{border-radius:6px;text-align:left;font-family:var(--body);font-weight:400;border-color:var(--line);color:var(--ink)}
+.opts button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.opts button.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.explain{font-size:.95rem;color:var(--muted)}
+
+/* parks */
+.sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.side{border-top:3px solid var(--water);padding-top:10px;display:grid;gap:8px}
+.side.against{border-top-color:var(--gauge)}
+.side ul{margin:0;padding-left:1.1em;display:grid;gap:6px}
+.vote{display:flex;flex-wrap:wrap;gap:8px}
+.ask{font-style:italic;font-size:1.1rem}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);display:grid;gap:10px;font-size:.9rem;color:var(--muted)}
+footer ul{margin:0;padding-left:1.1em}
+@media (prefers-reduced-motion: reduce){.fill{transition:none}}
+@media (max-width:480px){.station{grid-template-columns:32px minmax(0,1fr);gap:0 10px}.mark{width:32px;height:32px;font-size:.7rem}.rail::before{left:15px}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="hero">
+  <div class="label kicker">Econ 238 · Environmental justice</div>
+  <h1>Who Gets <span>the Wall?</span></h1>
+  <p class="lede">Flood levees, noise barriers, reservations, national parks. Each one is a story about who gets protection and who gets property rights. Play with the numbers below and see where the benefits actually land.</p>
+  <p class="note">By Tom Hamilton. Built from my written answers and audio discussion for Week Nine.</p>
+</header>
+
+<section class="station" id="levee">
+  <div class="rail"><div class="mark">01</div></div>
+  <div class="content">
+    <div class="label">Indianapolis · August 2026</div>
+    <h2>The levee test</h2>
+    <p>In August 2026, a record White River flood hit Indianapolis. The North levee kept the river out of Broad Ripple. A mile away, the town of Rocky Ripple sat outside the wall and sandbagged its own 1937 levee. The Army Corps funds a levee only if its <b>benefit-cost ratio</b> is above 1, and it counts benefits mostly as property damage avoided. Try it yourself.</p>
+    <div class="panel">
+      <div class="presets" role="group" aria-label="Neighborhood presets">
+        <button type="button" id="p-rr" aria-pressed="true">Rocky Ripple</button>
+        <button type="button" id="p-br" aria-pressed="false">Broad Ripple side</button>
+      </div>
+      <div class="sliders">
+        <div class="slider"><label for="s-homes">Buildings protected</label><output id="o-homes" for="s-homes"></output><input type="range" id="s-homes" min="50" max="2500" step="5"></div>
+        <div class="slider"><label for="s-value">Median home value</label><output id="o-value" for="s-value"></output><input type="range" id="s-value" min="80000" max="600000" step="5000"></div>
+        <div class="slider"><label for="s-cost">Cost of the wall</label><output id="o-cost" for="s-cost"></output><input type="range" id="s-cost" min="5" max="80" step="0.5"></div>
+      </div>
+      <div class="gauge">
+        <div class="verdict"><span class="big" id="bcr">0.30</span><span class="pill fail" id="bcr-pill">Not funded</span></div>
+        <div class="bar" aria-hidden="true"><div class="fill" id="fill"></div><div class="thresh" style="left:25%"></div></div>
+        <div class="scale" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:25%">1.0 · funding line</span><span style="left:100%;transform:translateX(-100%)">4+</span></div>
+      </div>
+      <p class="note">Simplified model: benefit = buildings × home value × a damage factor calibrated so Rocky Ripple's real numbers (about 315 buildings, $33.5M extra cost) give the 0.3 ratio in the city's 2017 study. Illustrative, not the Corps' actual model.</p>
+    </div>
+    <p><b>The catch:</b> drag the home value up and Rocky Ripple passes, with nothing else changed. The rule measures protection in dollars of property, so it flows to where wealth already is. Rocky Ripple is mostly white with income near the state median, so a demographic EJ law like Massachusetts' would never flag it.</p>
+  </div>
+</section>
+
+<section class="station" id="noise">
+  <div class="rail"><div class="mark">02</div></div>
+  <div class="content">
+    <div class="label">Moretti &amp; Wheeler, NBER w34298</div>
+    <h2>Who keeps the quiet?</h2>
+    <p>When a highway noise barrier goes up, nearby home prices jump about <b>6.8%</b>. Traffic noise costs the U.S. an estimated $110 billion, borne most by lower-income households. So a barrier is environmental justice, right? Pick who you are.</p>
+    <div class="panel">
+      <div class="slider"><label for="s-home">Home value near the highway</label><output id="o-home" for="s-home"></output><input type="range" id="s-home" min="100000" max="600000" step="5000" value="218200"></div>
+      <div class="nums">
+        <div class="num"><span class="label">One-time price gain</span><b id="gain"></b></div>
+        <div class="num"><span class="label">Per year at 5%</span><b id="gain-yr"></b></div>
+        <div class="num"><span class="label">Per month</span><b id="gain-mo"></b></div>
+      </div>
+      <div class="who" role="group" aria-label="Who are you">
+        <button type="button" data-who="owner" aria-pressed="true">Homeowner</button>
+        <button type="button" data-who="renter" aria-pressed="false">Renter, lease ending</button>
+        <button type="button" data-who="landlord" aria-pressed="false">Absentee landlord</button>
+        <button type="button" data-who="taxpayer" aria-pressed="false">Taxpayer</button>
+      </div>
+      <div class="outcome" aria-live="polite"><h3 id="who-h"></h3><p id="who-p"></p></div>
+    </div>
+    <p>A place-based fix gets capitalized into the land. The benefit sticks to the place, not to the people the policy meant to help. A just policy has to decide in advance who captures that gain.</p>
+  </div>
+</section>
+
+<section class="station" id="tribal">
+  <div class="rail"><div class="mark">03</div></div>
+  <div class="content">
+    <div class="label">Tribal land today</div>
+    <h2>Whose land is it, legally?</h2>
+    <p>Land acknowledgments describe dispossession as something in the past. Test what you know about the property rules tribes live under right now.</p>
+    <div class="panel" id="quiz"></div>
+  </div>
+</section>
+
+<section class="station" id="parks">
+  <div class="rail"><div class="mark">04</div></div>
+  <div class="content">
+    <div class="label">The proposal</div>
+    <h2>Give the national parks back?</h2>
+    <p>Yellowstone took Crow land. Glacier erased Blackfeet hunting rights. Yosemite pushed out the Ahwahneechee. Meanwhile, parks are crowded, underpriced, and carry a maintenance backlog of over $20 billion. One proposal: hand them to the tribes that were removed, with a covenant like "no Costco at Old Faithful."</p>
+    <div class="panel">
+      <div class="sides">
+        <div class="side"><h3>The case for</h3><ul>
+          <li>Parks are already federal land, so no homeowner is displaced.</li>
+          <li>One owner of a whole park has every reason to protect the view visitors pay for.</li>
+          <li>Tribal parks already price for crowding: Ute Mountain charges $50 a person a day, Yellowstone $35 a car.</li>
+          <li>Cheap access mostly subsidizes visitors who can afford a car, time off, and travel.</li>
+        </ul></div>
+        <div class="side against"><h3>The case against</h3><ul>
+          <li>Under the trust system, tribes may not get clear title, so they'd face the same federal approvals that stall reservations.</li>
+          <li>Several tribes claim the same parks. Who decides?</li>
+          <li>Higher prices raise their own access concern for low-income visitors.</li>
+          <li>Owners could close access entirely, as Uluru's owners banned climbing.</li>
+        </ul></div>
+      </div>
+      <div class="vote" role="group" aria-label="Your view">
+        <button type="button" data-v="full" aria-pressed="false">Full transfer</button>
+        <button type="button" data-v="co" aria-pressed="false">Co-manage or lease</button>
+        <button type="button" data-v="no" aria-pressed="false">Keep federal</button>
+      </div>
+      <p class="outcome" id="vote-out" aria-live="polite">Pick a side to see a follow-up question.</p>
+    </div>
+  </div>
+</section>
+
+<section class="station" id="thread">
+  <div class="rail"><div class="mark">05</div></div>
+  <div class="content">
+    <h2>The common thread</h2>
+    <p>Rocky Ripple, noise barriers, reservations, and parks share one lesson: environmental justice runs through property rights. Casinos boomed and the Squamish Nation is building thousands of homes in Vancouver because tribes got a clear right to valuable land. A land acknowledgment gives a tribe its name back. A real property right gives it power.</p>
+    <p class="ask">If your institution acknowledges the land, what would it take for that statement to cost something?</p>
+  </div>
+</section>
+
+<footer>
+  <span class="label">Sources</span>
+  <ul>
+    <li><a href="https://rockyripple.in.gov/wp-content/uploads/2020/01/infdrp-study-rocky-ripple_aecom-feb-2017.pdf" target="_blank" rel="noopener">AECOM study of Rocky Ripple flood protection (2017)</a></li>
+    <li><a href="https://www.randomripplings.com/issues/2026/20260827/rr_4.htm" target="_blank" rel="noopener">Broad Ripple Gazette, "The Flood" (Aug 2026)</a></li>
+    <li><a href="https://www.nber.org/papers/w34298" target="_blank" rel="noopener">Moretti &amp; Wheeler, The Traffic Noise Externality (NBER, 2025)</a></li>
+    <li>Anderson &amp; Fretwell, Wall Street Journal (Oct 2025), via the Econ 238 assignment</li>
+  </ul>
+</footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const usd=n=>"$"+Math.round(n).toLocaleString("en-US");
+  const K=10.05e6/(315*190000); // calibrates Rocky Ripple to BCR 0.3
+  const presets={rr:{h:315,v:190000,c:33.5},br:{h:2000,v:360000,c:14.5}};
+  const sh=$("s-homes"),sv=$("s-value"),sc=$("s-cost");
+  function setPreset(k){const p=presets[k];sh.value=p.h;sv.value=p.v;sc.value=p.c;
+    $("p-rr").setAttribute("aria-pressed",k==="rr");$("p-br").setAttribute("aria-pressed",k==="br");levee();}
+  function levee(){
+    const h=+sh.value,v=+sv.value,c=+sc.value;
+    $("o-homes").textContent=h.toLocaleString("en-US");
+    $("o-value").textContent=usd(v);
+    $("o-cost").textContent="$"+c.toFixed(1)+"M";
+    const bcr=(h*v*K)/(c*1e6);
+    $("bcr").textContent=bcr>=10?bcr.toFixed(0):bcr.toFixed(2);
+    const pass=bcr>=1, f=$("fill"), p=$("bcr-pill");
+    f.style.width=Math.min(bcr/4,1)*100+"%"; f.classList.toggle("pass",pass);
+    p.textContent=pass?"Funded":"Not funded"; p.className="pill "+(pass?"pass":"fail");
+  }
+  [sh,sv,sc].forEach(el=>el.addEventListener("input",()=>{["p-rr","p-br"].forEach(i=>$(i).setAttribute("aria-pressed","false"));levee();}));
+  $("p-rr").onclick=()=>setPreset("rr"); $("p-br").onclick=()=>setPreset("br");
+  setPreset("rr");
+
+  // noise
+  const outcomes={
+    owner:["You win, twice","You get the quiet and a home-value windfall of about 6.8%. For low-income owners, this is real environmental justice."],
+    renter:["You win, briefly","You enjoy the quiet until your lease is up. Then the landlord raises the rent to match the new value, and you pay for the quiet or move out."],
+    landlord:["You win the most","You never lived with the noise, and now you collect higher rent and a higher sale price. Public money became your private gain."],
+    taxpayer:["You pay","You funded the barrier. Most of the benefit was captured by whoever owned the land on the day it went up."]
+  };
+  let who="owner";
+  function noise(){
+    const v=+$("s-home").value,g=v*.068;
+    $("o-home").textContent=usd(v);$("gain").textContent=usd(g);$("gain-yr").textContent=usd(g*.05);$("gain-mo").textContent=usd(g*.05/12);
+    $("who-h").textContent=outcomes[who][0];$("who-p").textContent=outcomes[who][1];
+    document.querySelectorAll("[data-who]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.who===who));
+  }
+  $("s-home").addEventListener("input",noise);
+  document.querySelectorAll("[data-who]").forEach(b=>b.onclick=()=>{who=b.dataset.who;noise();});
+  noise();
+
+  // quiz
+  const Q=[
+    {q:"Who holds legal title to most reservation land?",o:["The tribe, outright","Individual residents","The federal government, in trust for the tribe"],a:2,
+     e:"Most reservation land is held in trust by Washington. Tribes can use it, but selling, mortgaging, or leasing it usually needs Bureau of Indian Affairs approval."},
+    {q:"Roughly how much tribal land was lost under allotment (1887 to 1934)?",o:["About 10 million acres","About 90 million acres","Almost none"],a:1,
+     e:"The Dawes Act split communal land into allotments and sold the 'surplus.' Holdings fell from about 138 million acres to about 48 million."},
+    {q:"Why can't most reservation homeowners get a normal mortgage?",o:["Banks refuse to lend to tribes","Trust land can't easily be used as collateral","Reservations ban mortgages"],a:1,
+     e:"Without the ability to pledge land, residents can't borrow against their biggest asset, a disadvantage every off-reservation owner avoids."},
+    {q:"Why did tribal casinos boom when most other investment didn't?",o:["Casinos are cheap to build","Tribes got a clear legal right on land they already controlled","Federal grants paid for them"],a:1,
+     e:"The 1988 Indian Gaming Regulatory Act gave tribes a defensible right to something neighbors couldn't do, with no need to sell or mortgage the land."}
+  ];
+  const quiz=$("quiz");
+  Q.forEach((it,i)=>{
+    const d=document.createElement("div");d.className="q";
+    d.innerHTML='<h3>'+(i+1)+'. '+it.q+'</h3><div class="opts"></div><p class="explain" hidden></p>';
+    const opts=d.querySelector(".opts"),ex=d.querySelector(".explain");
+    it.o.forEach((t,j)=>{const b=document.createElement("button");b.type="button";b.textContent=t;
+      b.onclick=()=>{opts.querySelectorAll("button").forEach((x,k)=>{x.disabled=true;if(k===it.a)x.classList.add("right");});
+        if(j!==it.a)b.classList.add("wrong");ex.textContent=(j===it.a?"Right. ":"Not quite. ")+it.e;ex.hidden=false;};
+      opts.appendChild(b);});
+    quiz.appendChild(d);
+  });
+
+  // parks vote
+  const follow={
+    full:"Then what do you do about title? If the parks stay in federal trust, tribes inherit the same approval delays that stall reservations today.",
+    co:"Then who has the final say when the tribe and the Park Service disagree? Co-management only works if that answer is written down.",
+    no:"Then what would you propose instead? If you support restitution but not the parks, which federal land would you return, and why not this?"
+  };
+  document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b));
+    $("vote-out").textContent=follow[b.dataset.v];});
+})();
+</script>
+</body>
+</html>
