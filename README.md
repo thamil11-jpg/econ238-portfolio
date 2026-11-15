@@ -5,3 +5,5 @@
    - [Assignment 8: The $1 Escape Hatch](assignment-08.md/)
    - [Assignment 9: Who Gets the Wall?](assignment-09.md/)
    - [Assignment 10: Rochester Moat Notice](assignment-10-Rochester-Moat-Notice.pdf/)
+   - [Assignment 11: David Grouper Predator](assignment-11.md/)
+   - [David Grouper Infographic](DavidGrouperInfo.png/)
